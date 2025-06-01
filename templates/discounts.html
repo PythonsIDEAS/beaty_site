@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}Акции и подарочные сертификаты{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .hero-section { background: linear-gradient(to right, #F9F5F2, #FFF); }
+    .text-2xl.font-bold { color: #6B46C1; }
+    
+    .discount-card {
+        background: white;
+        border-radius: 1rem;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .discount-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .discount-badge {
+        background-color: #B88D7B;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 9999px;
+        font-weight: 500;
+    }
+</style>
+{% endblock %}
+
+{% block header %}
+    <header class="fixed w-full bg-white/80 backdrop-blur-md shadow-sm z-50">
+        <nav class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="text-2xl font-bold text-[#B88D7B]">BeautyDoc</div>
+            <ul class="flex space-x-6 items-center">
+                <li><a href="{{ url_for('index') }}" class="text-gray-600 hover:text-[#B88D7B]">Главная</a></li>
+                <li><a href="{{ url_for('services') }}" class="text-gray-600 hover:text-[#B88D7B]">Услуги</a></li>
+                <li><a href="#" class="text-[#B88D7B]">Акции</a></li>
+                <li><a href="{{ url_for('index') }}#about" class="text-gray-600 hover:text-[#B88D7B]">О нас</a></li>
+                <li><a href="{{ url_for('index') }}#contact" class="text-gray-600 hover:text-[#B88D7B]">Контакты</a></li>
+            </ul>
+        </nav>
+    </header>
+{% endblock %}
+
+{% block content %}
+    <main class="min-h-screen pt-20 pb-16">
+        <!-- Current Promotions Section -->
+        <section class="py-16 px-4 bg-[#F9F5F2]">
+            <div class="container mx-auto">
+                <h2 class="text-3xl font-bold text-center text-[#4A4A4A] mb-12">Текущие акции</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- Promotion 1 -->
+                    <div class="discount-card">
+                        <div class="relative p-6">
+                            <div class="absolute top-4 right-4">
+                                <span class="discount-badge">-25%</span>
+                            </div>
+                            <h3 class="text-xl font-semibold text-[#4A4A4A] mb-3">Комплекс процедур</h3>
+                            <p class="text-gray-600 mb-4">Скидка 25% на комплекс процедур для комплексного ухода за кожей</p>
+                            <button onclick="showPopup()" class="w-full bg-[#B88D7B] text-white py-3 rounded-full hover:bg-[#A67C6B] transition-colors">
+                                Записаться
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Promotion 2 -->
+                    <div class="discount-card">
+                        <div class="relative p-6">
+                            <div class="absolute top-4 right-4">
+                                <span class="discount-badge">-20%</span>
+                            </div>
+                            <h3 class="text-xl font-semibold text-[#4A4A4A] mb-3">Биоревитализация</h3>
+                            <p class="text-gray-600 mb-4">Акция месяца: Скидка 20% на процедуру биоревитализации</p>
+                            <button onclick="showPopup()" class="w-full bg-[#B88D7B] text-white py-3 rounded-full hover:bg-[#A67C6B] transition-colors">
+                                Записаться
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Promotion 3 -->
+                    <div class="discount-card">
+                        <div class="relative p-6">
+                            <div class="absolute top-4 right-4">
+                                <span class="discount-badge">NEW</span>
+                            </div>
+                            <h3 class="text-xl font-semibold text-[#4A4A4A] mb-3">RF-лифтинг</h3>
+                            <p class="text-gray-600 mb-4">Новинка: RF-лифтинг для омоложения кожи по специальной цене</p>
+                            <button onclick="showPopup()" class="w-full bg-[#B88D7B] text-white py-3 rounded-full hover:bg-[#A67C6B] transition-colors">
+                                Записаться
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Gift Cards Section -->
+        <section class="gift-cards-section py-16 px-4 bg-white">
+            <div class="container mx-auto">
+                <h2 class="text-3xl font-bold text-center text-[#4A4A4A] mb-12">Подарочные сертификаты</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- Сертификат 5000 -->
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden transform transition-all duration-300 hover:shadow-xl hover:-translate-y-2">
+                        <div class="relative">
+                            <img src="{{ url_for('static', filename='images/gift-card-5000.svg') }}" alt="Подарочный сертификат 5000" class="w-full h-48 object-cover">
+                            <div class="absolute top-4 right-4 bg-[#B88D7B] text-white px-4 py-2 rounded-full">
+                                5 000 ₸
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-semibold text-[#4A4A4A] mb-3">Базовый уход</h3>
+                            <p class="text-gray-600 mb-4">Идеальный подарок для знакомства с нашими услугами. Включает базовые процедуры по уходу за кожей.</p>
+                            <button onclick="showPopup()" class="w-full bg-[#B88D7B] text-white py-3 rounded-full hover:bg-[#A67C6B] transition-colors">
+                                Заказать сертификат
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Сертификат 10000 -->
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden transform transition-all duration-300 hover:shadow-xl hover:-translate-y-2">
+                        <div class="relative">
+                            <img src="{{ url_for('static', filename='images/gift-card-10000.svg') }}" alt="Подарочный сертификат 10000" class="w-full h-48 object-cover">
+                            <div class="absolute top-4 right-4 bg-[#B88D7B] text-white px-4 py-2 rounded-full">
+                                10 000 ₸
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-semibold text-[#4A4A4A] mb-3">Комплексный уход</h3>
+                            <p class="text-gray-600 mb-4">Расширенный набор процедур для комплексного ухода и омоложения кожи.</p>
+                            <button onclick="showPopup()" class="w-full bg-[#B88D7B] text-white py-3 rounded-full hover:bg-[#A67C6B] transition-colors">
+                                Заказать сертификат
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Сертификат 15000 -->
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden transform transition-all duration-300 hover:shadow-xl hover:-translate-y-2">
+                        <div class="relative">
+                            <img src="{{ url_for('static', filename='images/gift-card-15000.svg') }}" alt="Подарочный сертификат 15000" class="w-full h-48 object-cover">
+                            <div class="absolute top-4 right-4 bg-[#B88D7B] text-white px-4 py-2 rounded-full">
+                                15 000 ₸
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-semibold text-[#4A4A4A] mb-3">Премиум уход</h3>
+                            <p class="text-gray-600 mb-4">Полный комплекс премиальных процедур для максимального результата.</p>
+                            <button onclick="showPopup()" class="w-full bg-[#B88D7B] text-white py-3 rounded-full hover:bg-[#A67C6B] transition-colors">
+                                Заказать сертификат
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+{% endblock %}

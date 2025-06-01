@@ -1,0 +1,217 @@
+
+
+{% extends "base.html" %}
+
+{% block title %}Панель управления - Admin{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .admin-container {
+        background: white;
+        border-radius: 1rem;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .admin-header {
+        background: linear-gradient(to right, #B88D7B, #D2B4A2);
+        color: white;
+        border-radius: 0.5rem 0.5rem 0 0;
+    }
+    
+    .stat-card {
+        border-radius: 1rem;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+    }
+    
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    
+    .status-pending {
+        background-color: #FEF3C7;
+        color: #92400E;
+    }
+    
+    .status-confirmed {
+        background-color: #D1FAE5;
+        color: #065F46;
+    }
+    
+    .status-cancelled {
+        background-color: #FEE2E2;
+        color: #B91C1C;
+    }
+    
+    .status-completed {
+        background-color: #E0E7FF;
+        color: #4338CA;
+    }
+</style>
+{% endblock %}
+
+{% block header %}
+    <header class="fixed w-full bg-white/80 backdrop-blur-md shadow-sm z-50">
+        <nav class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="text-2xl font-bold text-[#B88D7B]">BeautyDoc <span class="text-sm font-normal bg-[#B88D7B] text-white px-2 py-1 rounded">Admin</span></div>
+            <ul class="flex space-x-6 items-center">
+                <li><a href="{{ url_for('admin_dashboard') }}" class="text-[#B88D7B]">Панель</a></li>
+                <li><a href="{{ url_for('admin_services') }}" class="text-gray-600 hover:text-[#B88D7B]">Услуги</a></li>
+                <li><a href="{{ url_for('admin_appointments') }}" class="text-gray-600 hover:text-[#B88D7B]">Записи</a></li>
+                <li><a href="{{ url_for('admin_users') }}" class="text-gray-600 hover:text-[#B88D7B]">Пользователи</a></li>
+                <li><a href="{{ url_for('admin_reviews') }}" class="text-gray-600 hover:text-[#B88D7B]">Отзывы</a></li>
+                <li><a href="{{ url_for('index') }}" class="text-gray-600 hover:text-[#B88D7B]">На сайт</a></li>
+            </ul>
+        </nav>
+    </header>
+{% endblock %}
+
+{% block content %}
+<main class="min-h-screen pt-24 pb-16 px-4 bg-gray-50">
+    <div class="container mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-8">Панель управления</h1>
+        
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+            <!-- Users Card -->
+            <div class="stat-card bg-white p-6">
+                <div class="stat-icon bg-blue-100 text-blue-600">
+                    <i class="fas fa-users text-xl"></i>
+                </div>
+                <h2 class="text-lg font-semibold text-gray-800">Пользователи</h2>
+                <p class="text-3xl font-bold text-blue-600 mt-2">{{ users|length }}</p>
+                <a href="{{ url_for('admin_users') }}" class="mt-4 inline-block text-blue-600 hover:text-blue-800 text-sm font-medium">
+                    Управление пользователями <i class="fas fa-arrow-right ml-1"></i>
+                </a>
+            </div>
+
+            <!-- Services Card -->
+            <div class="stat-card bg-white p-6">
+                <div class="stat-icon bg-green-100 text-green-600">
+                    <i class="fas fa-spa text-xl"></i>
+                </div>
+                <h2 class="text-lg font-semibold text-gray-800">Услуги</h2>
+                <p class="text-3xl font-bold text-green-600 mt-2">{{ services|length }}</p>
+                <a href="{{ url_for('admin_services') }}" class="mt-4 inline-block text-green-600 hover:text-green-800 text-sm font-medium">
+                    Управление услугами <i class="fas fa-arrow-right ml-1"></i>
+                </a>
+            </div>
+
+            <!-- Appointments Card -->
+            <div class="stat-card bg-white p-6">
+                <div class="stat-icon bg-[#F9F5F2] text-[#B88D7B]">
+                    <i class="fas fa-calendar-check text-xl"></i>
+                </div>
+                <h2 class="text-lg font-semibold text-gray-800">Записи</h2>
+                <p class="text-3xl font-bold text-[#B88D7B] mt-2">{{ appointments|length }}</p>
+                <a href="{{ url_for('admin_appointments') }}" class="mt-4 inline-block text-[#B88D7B] hover:text-[#A67C6B] text-sm font-medium">
+                    Управление записями <i class="fas fa-arrow-right ml-1"></i>
+                </a>
+            </div>
+
+            <!-- Reviews Card -->
+            <div class="stat-card bg-white p-6">
+                <div class="stat-icon bg-purple-100 text-purple-600">
+                    <i class="fas fa-star text-xl"></i>
+                </div>
+                <h2 class="text-lg font-semibold text-gray-800">Отзывы</h2>
+                <p class="text-3xl font-bold text-purple-600 mt-2">{{ reviews|length }}</p>
+                <a href="{{ url_for('admin_reviews') }}" class="mt-4 inline-block text-purple-600 hover:text-purple-800 text-sm font-medium">
+                    Управление отзывами <i class="fas fa-arrow-right ml-1"></i>
+                </a>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Recent Appointments -->
+            <div class="admin-container overflow-hidden">
+                <div class="admin-header px-6 py-4 flex justify-between items-center">
+                    <h2 class="text-lg font-semibold">Последние записи</h2>
+                    <a href="{{ url_for('admin_appointments') }}" class="text-white hover:text-gray-100 text-sm">
+                        Все записи <i class="fas fa-arrow-right ml-1"></i>
+                    </a>
+                </div>
+                <div class="p-6">
+                    {% if appointments %}
+                        <div class="space-y-4">
+                            {% for appointment in appointments[:5] %}
+                            <div class="flex items-center justify-between border-b border-gray-100 pb-4">
+                                <div>
+                                    <p class="font-medium">{{ appointment.user.username }}</p>
+                                    <p class="text-sm text-gray-500">{{ appointment.service.name }}</p>
+                                    <p class="text-xs text-gray-400">{{ appointment.appointment_date.strftime('%d.%m.%Y %H:%M') }}</p>
+                                </div>
+                                <span class="status-badge {% if appointment.status == 'pending' %}status-pending{% elif appointment.status == 'confirmed' %}status-confirmed{% elif appointment.status == 'cancelled' %}status-cancelled{% elif appointment.status == 'completed' %}status-completed{% endif %}">
+                                    {% if appointment.status == 'pending' %}
+                                        Ожидает
+                                    {% elif appointment.status == 'confirmed' %}
+                                        Подтверждено
+                                    {% elif appointment.status == 'cancelled' %}
+                                        Отменено
+                                    {% elif appointment.status == 'completed' %}
+                                        Завершено
+                                    {% endif %}
+                                </span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-center text-gray-500 py-4">Нет записей для отображения</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Recent Reviews -->
+            <div class="admin-container overflow-hidden">
+                <div class="admin-header px-6 py-4 flex justify-between items-center">
+                    <h2 class="text-lg font-semibold">Последние отзывы</h2>
+                    <a href="{{ url_for('admin_reviews') }}" class="text-white hover:text-gray-100 text-sm">
+                        Все отзывы <i class="fas fa-arrow-right ml-1"></i>
+                    </a>
+                </div>
+                <div class="p-6">
+                    {% if reviews %}
+                        <div class="space-y-4">
+                            {% for review in reviews[:5] %}
+                            <div class="border-b border-gray-100 pb-4">
+                                <div class="flex justify-between items-center mb-2">
+                                    <p class="font-medium">{{ review.author.username }}</p>
+                                    <div class="flex items-center">
+                                        {% for i in range(5) %}
+                                            <i class="fas fa-star {% if i < review.rating %}text-yellow-400{% else %}text-gray-300{% endif %} text-sm"></i>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <p class="text-sm text-gray-600">{{ review.text[:100] }}{% if review.text|length > 100 %}...{% endif %}</p>
+                                <p class="text-xs text-gray-400 mt-1">{{ review.created_at.strftime('%d.%m.%Y') }}</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-center text-gray-500 py-4">Нет отзывов для отображения</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

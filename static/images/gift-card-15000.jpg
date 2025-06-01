@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="400" viewBox="0 0 800 400">
+  <defs>
+    <linearGradient id="cardGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F9F5F2"/>
+      <stop offset="100%" style="stop-color:#B88D7B"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="400" fill="url(#cardGradient)" rx="20"/>
+  <text x="400" y="180" font-family="Arial" font-size="48" fill="white" text-anchor="middle" font-weight="bold">Подарочный сертификат</text>
+  <text x="400" y="250" font-family="Arial" font-size="72" fill="white" text-anchor="middle" font-weight="bold">15000 ₸</text>
+  <path d="M700 50 Q 750 50, 750 100 L 750 300 Q 750 350, 700 350 L 100 350 Q 50 350, 50 300 L 50 100 Q 50 50, 100 50 L 700 50" fill="none" stroke="white" stroke-width="2" opacity="0.2"/>
+</svg>

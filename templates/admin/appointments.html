@@ -1,0 +1,257 @@
+{% extends "base.html" %}
+
+{% block title %}Управление записями - Admin{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .admin-container {
+        background: white;
+        border-radius: 1rem;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .admin-header {
+        background: linear-gradient(to right, #B88D7B, #D2B4A2);
+        color: white;
+        border-radius: 0.5rem 0.5rem 0 0;
+    }
+    
+    .appointment-card {
+        border-left: 4px solid transparent;
+        transition: all 0.2s ease;
+    }
+    
+    .appointment-card:hover {
+        background-color: #F9F5F2;
+    }
+    
+    .appointment-pending {
+        border-left-color: #F59E0B; /* Amber */
+    }
+    
+    .appointment-confirmed {
+        border-left-color: #10B981; /* Green */
+    }
+    
+    .appointment-cancelled {
+        border-left-color: #EF4444; /* Red */
+    }
+    
+    .appointment-completed {
+        border-left-color: #6366F1; /* Indigo */
+    }
+    
+    .btn-confirm {
+        background-color: #10B981;
+        color: white;
+        transition: all 0.2s;
+    }
+    
+    .btn-confirm:hover {
+        background-color: #059669;
+    }
+    
+    .btn-reject {
+        background-color: #EF4444;
+        color: white;
+        transition: all 0.2s;
+    }
+    
+    .btn-reject:hover {
+        background-color: #DC2626;
+    }
+    
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    
+    .status-pending {
+        background-color: #FEF3C7;
+        color: #92400E;
+    }
+    
+    .status-confirmed {
+        background-color: #D1FAE5;
+        color: #065F46;
+    }
+    
+    .status-cancelled {
+        background-color: #FEE2E2;
+        color: #B91C1C;
+    }
+    
+    .status-completed {
+        background-color: #E0E7FF;
+        color: #4338CA;
+    }
+</style>
+{% endblock %}
+
+{% block header %}
+    <header class="fixed w-full bg-white/80 backdrop-blur-md shadow-sm z-50">
+        <nav class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="text-2xl font-bold text-[#B88D7B]">BeautyDoc <span class="text-sm font-normal bg-[#B88D7B] text-white px-2 py-1 rounded">Admin</span></div>
+            <ul class="flex space-x-6 items-center">
+                <li><a href="{{ url_for('admin_dashboard') }}" class="text-gray-600 hover:text-[#B88D7B]">Панель</a></li>
+                <li><a href="{{ url_for('admin_services') }}" class="text-gray-600 hover:text-[#B88D7B]">Услуги</a></li>
+                <li><a href="{{ url_for('admin_appointments') }}" class="text-[#B88D7B]">Записи</a></li>
+                <li><a href="{{ url_for('admin_users') }}" class="text-gray-600 hover:text-[#B88D7B]">Пользователи</a></li>
+                <li><a href="{{ url_for('admin_reviews') }}" class="text-gray-600 hover:text-[#B88D7B]">Отзывы</a></li>
+                <li><a href="{{ url_for('index') }}" class="text-gray-600 hover:text-[#B88D7B]">На сайт</a></li>
+            </ul>
+        </nav>
+    </header>
+{% endblock %}
+
+{% block content %}
+<main class="min-h-screen pt-24 pb-16 px-4 bg-gray-50">
+    <div class="container mx-auto">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">Управление записями</h1>
+            <div class="flex space-x-4">
+                <a href="{{ url_for('admin_calendar') }}" class="px-4 py-2 bg-[#B88D7B] text-white rounded-lg hover:bg-[#A67C6B] transition-colors flex items-center">
+                    <i class="fas fa-calendar-alt mr-2"></i> Календарь
+                </a>
+            </div>
+        </div>
+        
+        <!-- Filter Controls -->
+        <div class="bg-white p-4 rounded-lg shadow-sm mb-6 flex flex-wrap gap-4">
+            <div class="flex-1 min-w-[200px]">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Фильтр по статусу</label>
+                <select id="status-filter" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#B88D7B] focus:border-transparent">
+                    <option value="all">Все записи</option>
+                    <option value="pending">Ожидающие</option>
+                    <option value="confirmed">Подтвержденные</option>
+                    <option value="cancelled">Отмененные</option>
+                    <option value="completed">Завершенные</option>
+                </select>
+            </div>
+            <div class="flex-1 min-w-[200px]">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Фильтр по дате</label>
+                <input type="date" id="date-filter" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#B88D7B] focus:border-transparent">
+            </div>
+            <div class="flex-1 min-w-[200px]">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Поиск</label>
+                <input type="text" id="search-filter" placeholder="Имя клиента или услуга" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#B88D7B] focus:border-transparent">
+            </div>
+        </div>
+        
+        <!-- Appointments List -->
+        <div class="admin-container overflow-hidden">
+            <div class="admin-header px-6 py-4 flex items-center">
+                <div class="grid grid-cols-12 gap-4 w-full text-sm font-medium">
+                    <div class="col-span-1">#</div>
+                    <div class="col-span-2">Дата и время</div>
+                    <div class="col-span-2">Клиент</div>
+                    <div class="col-span-3">Услуга</div>
+                    <div class="col-span-1">Статус</div>
+                    <div class="col-span-3 text-right">Действия</div>
+                </div>
+            </div>
+            
+            <div class="divide-y divide-gray-200">
+                {% for appointment in appointments %}
+                <div class="appointment-card px-6 py-4 {% if appointment.status == 'pending' %}appointment-pending{% elif appointment.status == 'confirmed' %}appointment-confirmed{% elif appointment.status == 'cancelled' %}appointment-cancelled{% elif appointment.status == 'completed' %}appointment-completed{% endif %}">
+                    <div class="grid grid-cols-12 gap-4 items-center">
+                        <div class="col-span-1 font-medium">{{ appointment.id }}</div>
+                        <div class="col-span-2">{{ appointment.appointment_date.strftime('%d.%m.%Y %H:%M') }}</div>
+                        <div class="col-span-2">{{ appointment.user.username }}</div>
+                        <div class="col-span-3">{{ appointment.service.name }}</div>
+                        <div class="col-span-1">
+                            <span class="status-badge {% if appointment.status == 'pending' %}status-pending{% elif appointment.status == 'confirmed' %}status-confirmed{% elif appointment.status == 'cancelled' %}status-cancelled{% elif appointment.status == 'completed' %}status-completed{% endif %}">
+                                {% if appointment.status == 'pending' %}
+                                    Ожидает
+                                {% elif appointment.status == 'confirmed' %}
+                                    Подтверждено
+                                {% elif appointment.status == 'cancelled' %}
+                                    Отменено
+                                {% elif appointment.status == 'completed' %}
+                                    Завершено
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="col-span-3 flex justify-end space-x-2">
+                            {% if appointment.status == 'pending' %}
+                            <form action="{{ url_for('admin_appointment_detail', appointment_id=appointment.id) }}" method="POST" class="inline">
+                                <input type="hidden" name="status" value="confirmed">
+                                <input type="hidden" name="admin_notes" value="Appointment confirmed by admin">
+                                <button type="submit" class="btn-confirm px-3 py-1 rounded text-sm">Подтвердить</button>
+                            </form>
+                            <form action="{{ url_for('admin_appointment_detail', appointment_id=appointment.id) }}" method="POST" class="inline">
+                                <input type="hidden" name="status" value="cancelled">
+                                <input type="hidden" name="admin_notes" value="Appointment cancelled by admin">
+                                <button type="submit" class="btn-reject px-3 py-1 rounded text-sm">Отклонить</button>
+                            </form>
+                            {% endif %}
+                            <a href="{{ url_for('admin_appointment_detail', appointment_id=appointment.id) }}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 rounded text-sm transition-colors">Детали</a>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="p-8 text-center text-gray-500">
+                    <p>Нет записей для отображения</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    // Filter functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const statusFilter = document.getElementById('status-filter');
+        const dateFilter = document.getElementById('date-filter');
+        const searchFilter = document.getElementById('search-filter');
+        const appointmentCards = document.querySelectorAll('.appointment-card');
+        
+        function applyFilters() {
+            const statusValue = statusFilter.value;
+            const dateValue = dateFilter.value;
+            const searchValue = searchFilter.value.toLowerCase();
+            
+            appointmentCards.forEach(card => {
+                let showByStatus = true;
+                let showByDate = true;
+                let showBySearch = true;
+                
+                // Status filter
+                if (statusValue !== 'all') {
+                    showByStatus = card.classList.contains(`appointment-${statusValue}`);
+                }
+                
+                // Date filter
+                if (dateValue) {
+                    const appointmentDate = card.querySelector('.col-span-2').textContent.trim().split(' ')[0];
+                    const [day, month, year] = appointmentDate.split('.');
+                    const formattedDate = `${year}-${month}-${day}`;
+                    showByDate = formattedDate === dateValue;
+                }
+                
+                // Search filter
+                if (searchValue) {
+                    const clientName = card.querySelector('.col-span-2:nth-child(3)').textContent.toLowerCase();
+                    const serviceName = card.querySelector('.col-span-3').textContent.toLowerCase();
+                    showBySearch = clientName.includes(searchValue) || serviceName.includes(searchValue);
+                }
+                
+                // Show/hide card based on all filters
+                if (showByStatus && showByDate && showBySearch) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+        
+        // Add event listeners
+        statusFilter.addEventListener('change', applyFilters);
+        dateFilter.addEventListener('change', applyFilters);
+        searchFilter.addEventListener('input', applyFilters);
+    });
+</script>
+{% endblock %}

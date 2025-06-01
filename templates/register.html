@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}Регистрация - BeautyDoc{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .hero-section { background: linear-gradient(to right, #F9F5F2, #FFF); }
+    
+    .form-container {
+        background: white;
+        border-radius: 1rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .form-container:hover {
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .form-input {
+        width: 100%;
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+        border: 1px solid #E5E7EB;
+        border-radius: 0.5rem;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+    
+    .form-input:focus {
+        border-color: #B88D7B;
+    }
+    
+    .error-message {
+        color: #EF4444;
+        font-size: 0.875rem;
+        margin-top: -0.5rem;
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block header %}
+    <header class="fixed w-full bg-white/80 backdrop-blur-md shadow-sm z-50">
+        <nav class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="text-2xl font-bold text-[#B88D7B]">BeautyDoc</div>
+            <ul class="flex space-x-6 items-center">
+                <li><a href="{{ url_for('index') }}" class="text-gray-600 hover:text-[#B88D7B]">Главная</a></li>
+                <li><a href="{{ url_for('services') }}" class="text-gray-600 hover:text-[#B88D7B]">Услуги</a></li>
+                <li><a href="{{ url_for('discounts') }}" class="text-gray-600 hover:text-[#B88D7B]">Акции</a></li>
+                <li><a href="{{ url_for('index') }}#about" class="text-gray-600 hover:text-[#B88D7B]">О нас</a></li>
+                <li><a href="{{ url_for('index') }}#contact" class="text-gray-600 hover:text-[#B88D7B]">Контакты</a></li>
+            </ul>
+        </nav>
+    </header>
+{% endblock %}
+
+{% block content %}
+    <main class="min-h-screen pt-20 pb-16 bg-[#F9F5F2]">
+        <div class="container mx-auto px-4">
+            <div class="max-w-md mx-auto">
+                <div class="form-container p-8">
+                    <h2 class="text-2xl font-bold text-center text-[#4A4A4A] mb-6">Регистрация</h2>
+                    
+                    <form method="POST" action="{{ url_for('register') }}" class="space-y-4">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-4">
+                            <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Имя пользователя</label>
+                            {{ form.username(class="form-input", placeholder="Введите имя пользователя") }}
+                            {% if form.username.errors %}
+                                {% for error in form.username.errors %}
+                                    <p class="error-message">{{ error }}</p>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            {{ form.email(class="form-input", placeholder="Введите email") }}
+                            {% if form.email.errors %}
+                                {% for error in form.email.errors %}
+                                    <p class="error-message">{{ error }}</p>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Пароль</label>
+                            {{ form.password(class="form-input", placeholder="Введите пароль") }}
+                            {% if form.password.errors %}
+                                {% for error in form.password.errors %}
+                                    <p class="error-message">{{ error }}</p>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label for="confirm_password" class="block text-sm font-medium text-gray-700 mb-1">Подтверждение пароля</label>
+                            {{ form.confirm_password(class="form-input", placeholder="Подтвердите пароль") }}
+                            {% if form.confirm_password.errors %}
+                                {% for error in form.confirm_password.errors %}
+                                    <p class="error-message">{{ error }}</p>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        
+                        <button type="submit" class="w-full bg-[#B88D7B] text-white py-3 px-4 rounded-full hover:bg-[#A67C6B] transition-colors font-medium">
+                            Зарегистрироваться
+                        </button>
+                    </form>
+                    
+                    <p class="mt-4 text-center text-gray-600">
+                        Уже есть аккаунт? 
+                        <a href="{{ url_for('login') }}" class="text-[#B88D7B] hover:text-[#A67C6B] font-medium">Войти</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-4 text-center">
+            <p>&copy; 2024 BeautyDoc. Все права защищены.</p>
+        </div>
+    </footer>
+{% endblock %}

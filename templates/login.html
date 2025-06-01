@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}Вход - BeautyDoc{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .hero-section { background: linear-gradient(to right, #F9F5F2, #FFF); }
+    
+    .form-container {
+        background: white;
+        border-radius: 1rem;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .form-input {
+        width: 100%;
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+        border: 1px solid #E5E7EB;
+        border-radius: 0.5rem;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+    
+    .form-input:focus {
+        border-color: #B88D7B;
+    }
+    
+    .form-button {
+        width: 100%;
+        background-color: #B88D7B;
+        color: white;
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        transition: background-color 0.2s;
+    }
+    
+    .form-button:hover {
+        background-color: #A67C6B;
+    }
+    
+    .flash-message {
+        background-color: #FEF2F2;
+        color: #B91C1C;
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+        border: 1px solid #FCA5A5;
+    }
+</style>
+{% endblock %}
+
+{% block header %}
+    <header class="fixed w-full bg-white/80 backdrop-blur-md shadow-sm z-50">
+        <nav class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="text-2xl font-bold text-[#B88D7B]">BeautyDoc</div>
+            <ul class="flex space-x-6 items-center">
+                <li><a href="{{ url_for('index') }}" class="text-gray-600 hover:text-[#B88D7B]">Главная</a></li>
+                <li><a href="{{ url_for('services') }}" class="text-gray-600 hover:text-[#B88D7B]">Услуги</a></li>
+                <li><a href="{{ url_for('discounts') }}" class="text-gray-600 hover:text-[#B88D7B]">Акции</a></li>
+                <li><a href="{{ url_for('index') }}#about" class="text-gray-600 hover:text-[#B88D7B]">О нас</a></li>
+                <li><a href="{{ url_for('index') }}#contact" class="text-gray-600 hover:text-[#B88D7B]">Контакты</a></li>
+            </ul>
+        </nav>
+    </header>
+{% endblock %}
+
+{% block content %}
+    <main class="min-h-screen pt-24 pb-16">
+        <section class="py-12 px-4">
+            <div class="container mx-auto max-w-md">
+                <div class="form-container p-8">
+                    <div class="text-center mb-6">
+                        <i class="fas fa-user-circle text-5xl text-[#B88D7B] mb-4"></i>
+                        <h2 class="text-2xl font-bold text-[#4A4A4A]">Вход в аккаунт</h2>
+                    </div>
+                    
+                    {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="flash-message">{{ message }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                    
+                    <form method="POST" action="{{ url_for('login') }}">
+                        <div class="mb-4">
+                            <label for="username" class="block text-gray-700 mb-2">Имя пользователя</label>
+                            <input type="text" id="username" name="username" class="form-input" required>
+                        </div>
+                        <div class="mb-6">
+                            <label for="password" class="block text-gray-700 mb-2">Пароль</label>
+                            <input type="password" id="password" name="password" class="form-input" required>
+                        </div>
+                        <button type="submit" class="form-button">Войти</button>
+                    </form>
+                    
+                    <p class="text-center mt-6 text-gray-600">Нет аккаунта? <a href="{{ url_for('register') }}" class="text-[#B88D7B] hover:underline">Зарегистрируйтесь здесь</a></p>
+                </div>
+            </div>
+        </section>
+    </main>
+{% endblock %}

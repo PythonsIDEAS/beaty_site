@@ -1,0 +1,342 @@
+{% extends "base.html" %}
+
+{% block title %}Наши услуги - BeautyDoc{% endblock %}
+
+{% block header %}
+    <header class="fixed w-full bg-white/80 backdrop-blur-md shadow-sm z-50">
+        <nav class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="text-2xl font-bold text-[#B88D7B]">BeautyDoc</div>
+            <ul class="flex space-x-6 items-center">
+                <li><a href="{{ url_for('index') }}" class="text-gray-600 hover:text-[#B88D7B]">Главная</a></li>
+                <li><a href="{{ url_for('services') }}" class="text-[#B88D7B] font-medium">Услуги</a></li>
+                <li><a href="{{ url_for('discounts') }}" class="text-gray-600 hover:text-[#B88D7B]">Акции</a></li>
+                <li><a href="{{ url_for('index') }}#about" class="text-gray-600 hover:text-[#B88D7B]">О нас</a></li>
+                <li><a href="{{ url_for('index') }}#contact" class="text-gray-600 hover:text-[#B88D7B]">Контакты</a></li>
+                {% if 'user_id' in session %}
+                    <li>
+                        <a href="#" class="flex items-center text-gray-600 hover:text-[#B88D7B]">
+                            <i class="fas fa-user-circle text-xl mr-2"></i>Аккаунт
+                        </a>
+                    </li>
+                    <li><a href="{{ url_for('logout') }}" class="text-gray-600 hover:text-[#B88D7B]">Выход</a></li>
+                {% else %}
+                    <li><a href="{{ url_for('login') }}" class="text-gray-600 hover:text-[#B88D7B]">Вход</a></li>
+                    <li><a href="{{ url_for('register') }}" class="bg-[#B88D7B] text-white px-4 py-2 rounded-lg hover:bg-[#A67C6B]">Регистрация</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
+{% endblock %}
+
+{% block content %}
+    <main class="container mx-auto px-4 py-8">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <section class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">Наши услуги</h1>
+            <p class="text-xl text-gray-600 mb-8">Откройте для себя наш спектр профессиональных процедур красоты, созданных для подчеркивания вашей естественной красоты</p>
+            <div class="flex justify-center space-x-8 mb-12">
+                <div class="text-center">
+                    <i class="fas fa-certificate text-purple-600 text-3xl mb-3"></i>
+                    <h3 class="font-semibold">Сертифицированные эксперты</h3>
+                </div>
+                <div class="text-center">
+                    <i class="fas fa-star text-purple-600 text-3xl mb-3"></i>
+                    <h3 class="font-semibold">Премиум продукты</h3>
+                </div>
+                <div class="text-center">
+                    <i class="fas fa-heart text-purple-600 text-3xl mb-3"></i>
+                    <h3 class="font-semibold">100% удовлетворенность</h3>
+                </div>
+            </div>
+        </section>
+
+        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+            {% set services_data = [
+                {
+                    'name': 'Биоревитализация',
+                    'image': 'biorevitalization.svg',
+                    'description': 'Инновационная процедура омоложения кожи с помощью инъекций гиалуроновой кислоты.',
+                    'benefits': ['Глубокое увлажнение', 'Улучшение эластичности', 'Стимуляция коллагена'],
+                    'price': 15000,
+                    'service_id': 1
+                },
+                {
+                    'name': 'Квик лифтинг',
+                    'image': 'quick-lifting.svg',
+                    'description': 'Быстрая и эффективная процедура подтяжки кожи без хирургического вмешательства.',
+                    'benefits': ['Мгновенный эффект', 'Без реабилитации', 'Длительный результат'],
+                    'price': 12000,
+                    'service_id': 2
+                },
+                {
+                    'name': 'Уходовые процедуры',
+                    'image': 'care-procedures.svg',
+                    'description': 'Комплексный уход за кожей лица с использованием профессиональной косметики.',
+                    'benefits': ['Глубокое очищение', 'Питательные маски', 'Массаж лица'],
+                    'price': 8000,
+                    'old_price': 10000,
+                    'discount': 20,
+                    'service_id': 3
+                },
+                {
+                    'name': 'Пилинг',
+                    'image': 'peeling.svg',
+                    'description': 'Профессиональная процедура обновления кожи с помощью специальных составов.',
+                    'benefits': ['Выравнивание тона', 'Омоложение кожи', 'Устранение несовершенств'],
+                    'price': 9000,
+                    'old_price': 12000,
+                    'discount': 25,
+                    'service_id': 4
+                },
+                {
+                    'name': 'УЗ пилинг',
+                    'image': 'ultrasonic-peeling.svg',
+                    'description': 'Ультразвуковая чистка кожи для глубокого очищения и обновления.',
+                    'benefits': ['Безболезненная процедура', 'Глубокое очищение пор', 'Улучшение микроциркуляции'],
+                    'price': 11000,
+                    'old_price': 15000,
+                    'discount': 27,
+                    'service_id': 5
+                },
+                {
+                    'name': 'Биоармирование',
+                    'image': 'bioarmirovaniye.svg',
+                    'description': 'Инновационная методика укрепления и подтяжки кожи с помощью специальных препаратов.',
+                    'benefits': ['Лифтинг-эффект', 'Длительный результат', 'Натуральный вид'],
+                    'price': 18000,
+                    'old_price': 25000,
+                    'discount': 30,
+                    'service_id': 6
+                }
+            ] %}
+            
+            {% for service in services_data %}
+            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                <div class="p-6">
+                    <div class="flex justify-center mb-6">
+                        <img src="{{ url_for('static', filename='images/' + service.image) }}" alt="{{ service.name }}" class="w-24 h-24">
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">{{ service.name }}</h3>
+                    <p class="text-gray-600 mb-4">{{ service.description }}</p>
+                    <ul class="text-gray-600 mb-4 space-y-2">
+                        {% for benefit in service.benefits %}
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>{{ benefit }}</li>
+                        {% endfor %}
+                    </ul>
+                    <div class="mb-4">
+                        {% if service.old_price %}
+                        <p class="text-gray-400 line-through text-lg">{{ service.old_price }} ₸</p>
+                        <p class="text-2xl font-bold text-purple-600">От {{ service.price }} ₸</p>
+                        <span class="bg-red-100 text-red-600 text-sm px-2 py-1 rounded">-{{ service.discount }}%</span>
+                        {% else %}
+                        <p class="text-2xl font-bold text-purple-600 mb-4">От {{ service.price }} ₸</p>
+                        {% endif %}
+                    </div>
+                    <a href="{{ url_for('appointment', service_id=service.service_id) }}" class="block w-full bg-purple-600 text-white text-center px-4 py-2 rounded-lg hover:bg-purple-700 transition duration-200">Записаться</a>
+                </div>
+            </div>
+            {% endfor %}
+        </section>
+
+        <section class="mb-16">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-800">Отзывы наших клиентов</h2>
+                {% if 'user_id' in session %}
+                    <button onclick="openReviewModal()" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition duration-200 flex items-center">
+                        <i class="fas fa-plus mr-2"></i>Добавить отзыв
+                    </button>
+                {% endif %}
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {% for review in reviews %}
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="text-yellow-400 mb-4">
+                        {% for i in range(review.rating) %}
+                            <i class="fas fa-star"></i>
+                        {% endfor %}
+                    </div>
+                    <p class="text-gray-600 mb-4">"{{ review.text }}"</p>
+                    <div class="font-semibold">{{ review.author.username }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            </div>
+        </section>
+
+        <section class="text-center bg-purple-50 rounded-lg p-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Готовы записаться на процедуру?</h2>
+            <div class="flex justify-center space-x-4">
+                <a href="tel:1234567890" class="inline-flex items-center px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition duration-200">
+                    <i class="fas fa-phone mr-2"></i>Позвонить
+                </a>
+                <a href="mailto:info@beautydoc.com" class="inline-flex items-center px-6 py-3 bg-white text-purple-600 border-2 border-purple-600 rounded-lg hover:bg-purple-50 transition duration-200">
+                    <i class="fas fa-envelope mr-2"></i>Написать
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <!-- Review Modal -->
+    <div id="reviewModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-800">Оставить отзыв</h3>
+                <button onclick="closeReviewModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <form id="reviewForm" class="space-y-4">
+                <div class="flex items-center justify-center space-x-2 mb-4">
+                    <i class="far fa-star text-2xl cursor-pointer hover:text-yellow-400" data-rating="1"></i>
+                    <i class="far fa-star text-2xl cursor-pointer hover:text-yellow-400" data-rating="2"></i>
+                    <i class="far fa-star text-2xl cursor-pointer hover:text-yellow-400" data-rating="3"></i>
+                    <i class="far fa-star text-2xl cursor-pointer hover:text-yellow-400" data-rating="4"></i>
+                    <i class="far fa-star text-2xl cursor-pointer hover:text-yellow-400" data-rating="5"></i>
+                </div>
+                <input type="hidden" id="ratingInput" name="rating" value="0">
+                <div>
+                    <label for="reviewText" class="block text-gray-700 mb-2">Ваш отзыв</label>
+                    <textarea id="reviewText" name="review" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600" required></textarea>
+                </div>
+                <button type="submit" class="w-full bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition duration-200">Отправить отзыв</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openReviewModal() {
+            document.getElementById('reviewModal').classList.remove('hidden');
+            document.getElementById('reviewModal').classList.add('flex');
+        }
+
+        function closeReviewModal() {
+            document.getElementById('reviewModal').classList.remove('flex');
+            document.getElementById('reviewModal').classList.add('hidden');
+        }
+
+        // Star rating functionality
+        const stars = document.querySelectorAll('.fa-star');
+        let selectedRating = 0;
+
+        stars.forEach(star => {
+            star.addEventListener('click', () => {
+                const rating = parseInt(star.getAttribute('data-rating'));
+                selectedRating = rating;
+                document.getElementById('ratingInput').value = rating;
+
+                stars.forEach((s, index) => {
+                    if (index < rating) {
+                        s.classList.remove('far');
+                        s.classList.add('fas');
+                        s.classList.add('text-yellow-400');
+                    } else {
+                        s.classList.remove('fas');
+                        s.classList.add('far');
+                        s.classList.remove('text-yellow-400');
+                    }
+                });
+            });
+        });
+
+        // Form submission
+        document.getElementById('reviewForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const rating = selectedRating;
+            const text = document.getElementById('reviewText').value;
+
+            try {
+                const response = await fetch('/add_review', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ rating, text })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    closeReviewModal();
+                    location.reload(); // Reload to show the new review
+                } else {
+                    alert(data.error || 'Failed to submit review');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to submit review');
+            }
+        });
+ctorAll('.fa-star');
+        const ratingInput = document.getElementById('ratingInput');
+
+        stars.forEach(star => {
+            star.addEventListener('click', () => {
+                const rating = star.getAttribute('data-rating');
+                ratingInput.value = rating;
+                updateStars(rating);
+            });
+
+            star.addEventListener('mouseover', () => {
+                const rating = star.getAttribute('data-rating');
+                updateStars(rating);
+            });
+
+            star.addEventListener('mouseout', () => {
+                updateStars(ratingInput.value);
+            });
+        });
+
+        function updateStars(rating) {
+            stars.forEach(star => {
+                const starRating = star.getAttribute('data-rating');
+                if (starRating <= rating) {
+                    star.classList.remove('far');
+                    star.classList.add('fas');
+                    star.classList.add('text-yellow-400');
+                } else {
+                    star.classList.add('far');
+                    star.classList.remove('fas');
+                    star.classList.remove('text-yellow-400');
+                }
+            });
+        }
+
+        // Modal functionality
+        function openReviewModal() {
+            document.getElementById('reviewModal').classList.remove('hidden');
+            document.getElementById('reviewModal').classList.add('flex');
+        }
+
+        function closeReviewModal() {
+            document.getElementById('reviewModal').classList.add('hidden');
+            document.getElementById('reviewModal').classList.remove('flex');
+        }
+
+        // Form submission
+        document.getElementById('reviewForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Here you would typically send the data to your backend
+            const formData = {
+                rating: document.getElementById('ratingInput').value,
+                review: document.getElementById('reviewText').value
+            };
+            console.log('Review submitted:', formData);
+            closeReviewModal();
+            // You can add success message or redirect here
+        });
+    </script>
+
+    <footer class="bg-gray-800 text-white py-8 mt-12">
+        <div class="container mx-auto px-4 text-center">
+            <p>&copy; 2024 BeautyDoc. Все права защищены.</p>
+        </div>
+    </footer>
+{% endblock %}

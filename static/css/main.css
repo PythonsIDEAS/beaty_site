@@ -1,0 +1,88 @@
+/* Main Styles */
+:root {
+    --primary-color: #B88D7B;
+    --primary-hover: #A67C6A;
+    --text-color: #4A4A4A;
+    --bg-color: #F9F5F2;
+    --white: #ffffff;
+}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    color: var(--text-color);
+    line-height: 1.6;
+    background-color: var(--bg-color);
+}
+
+/* Hero Section */
+.hero-section {
+    min-height: 100vh;
+    background: linear-gradient(to right, var(--bg-color), var(--white));
+    padding: 4rem 0;
+}
+
+/* Typography */
+h1 {
+    font-size: 3.75rem;
+    font-weight: 300;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+}
+
+h2 {
+    font-size: 1.875rem;
+    margin-bottom: 3rem;
+}
+
+/* List Styles */
+ul li {
+    line-height: 1.8;
+    font-size: 1.125rem;
+    margin-bottom: 1rem;
+}
+
+/* Buttons */
+.consultation-btn {
+    background-color: #6B46C1;
+    color: var(--white);
+    padding: 1.25rem 2.5rem;
+    border-radius: 9999px;
+    font-size: 1.25rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(184, 141, 123, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.consultation-btn:hover {
+    background-color: #6B46C1;
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 6px 12px rgba(184, 141, 123, 0.3);
+}
+
+/* Images */
+.doctor-image {
+    border-radius: 9999px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 2rem 1rem;
+    }
+    
+    h1 {
+        font-size: 2.5rem;
+    }
+    
+    h2 {
+        font-size: 1.8rem;
+    }
+    
+    ul li {
+        font-size: 1rem;
+    }
+}

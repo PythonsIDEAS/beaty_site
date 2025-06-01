@@ -1,0 +1,328 @@
+{% extends "base.html" %}
+
+{% block title %}Детали записи - Admin{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .admin-container {
+        background: white;
+        border-radius: 1rem;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .admin-header {
+        background: linear-gradient(to right, #B88D7B, #D2B4A2);
+        color: white;
+        border-radius: 0.5rem 0.5rem 0 0;
+    }
+    
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    
+    .status-pending {
+        background-color: #FEF3C7;
+        color: #92400E;
+    }
+    
+    .status-confirmed {
+        background-color: #D1FAE5;
+        color: #065F46;
+    }
+    
+    .status-cancelled {
+        background-color: #FEE2E2;
+        color: #B91C1C;
+    }
+    
+    .status-completed {
+        background-color: #E0E7FF;
+        color: #4338CA;
+    }
+    
+    .btn-primary {
+        background-color: #B88D7B;
+        color: white;
+        transition: all 0.2s;
+    }
+    
+    .btn-primary:hover {
+        background-color: #A67C6B;
+    }
+    
+    .btn-confirm {
+        background-color: #10B981;
+        color: white;
+        transition: all 0.2s;
+    }
+    
+    .btn-confirm:hover {
+        background-color: #059669;
+    }
+    
+    .btn-reject {
+        background-color: #EF4444;
+        color: white;
+        transition: all 0.2s;
+    }
+    
+    .btn-reject:hover {
+        background-color: #DC2626;
+    }
+    
+    .btn-complete {
+        background-color: #6366F1;
+        color: white;
+        transition: all 0.2s;
+    }
+    
+    .btn-complete:hover {
+        background-color: #4F46E5;
+    }
+    
+    .timeline-container {
+        border-left: 2px solid #E5E7EB;
+        margin-left: 1.5rem;
+        padding-left: 1.5rem;
+    }
+    
+    .timeline-item {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+    
+    .timeline-item:before {
+        content: '';
+        position: absolute;
+        left: -2.5rem;
+        top: 0.25rem;
+        width: 1rem;
+        height: 1rem;
+        border-radius: 50%;
+        background-color: #B88D7B;
+    }
+    
+    .timeline-date {
+        font-size: 0.75rem;
+        color: #6B7280;
+        margin-bottom: 0.25rem;
+    }
+    
+    .timeline-content {
+        background-color: #F9F5F2;
+        padding: 1rem;
+        border-radius: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block header %}
+    <header class="fixed w-full bg-white/80 backdrop-blur-md shadow-sm z-50">
+        <nav class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="text-2xl font-bold text-[#B88D7B]">BeautyDoc <span class="text-sm font-normal bg-[#B88D7B] text-white px-2 py-1 rounded">Admin</span></div>
+            <ul class="flex space-x-6 items-center">
+                <li><a href="{{ url_for('admin_dashboard') }}" class="text-gray-600 hover:text-[#B88D7B]">Панель</a></li>
+                <li><a href="{{ url_for('admin_services') }}" class="text-gray-600 hover:text-[#B88D7B]">Услуги</a></li>
+                <li><a href="{{ url_for('admin_appointments') }}" class="text-[#B88D7B]">Записи</a></li>
+                <li><a href="{{ url_for('admin_users') }}" class="text-gray-600 hover:text-[#B88D7B]">Пользователи</a></li>
+                <li><a href="{{ url_for('admin_reviews') }}" class="text-gray-600 hover:text-[#B88D7B]">Отзывы</a></li>
+                <li><a href="{{ url_for('index') }}" class="text-gray-600 hover:text-[#B88D7B]">На сайт</a></li>
+            </ul>
+        </nav>
+    </header>
+{% endblock %}
+
+{% block content %}
+<main class="min-h-screen pt-24 pb-16 px-4 bg-gray-50">
+    <div class="container mx-auto max-w-5xl">
+        <div class="flex items-center mb-8">
+            <a href="{{ url_for('admin_appointments') }}" class="text-gray-600 hover:text-[#B88D7B] mr-4">
+                <i class="fas fa-arrow-left"></i> Назад к записям
+            </a>
+            <h1 class="text-3xl font-bold text-gray-800">Детали записи #{{ appointment.id }}</h1>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Appointment Details -->
+            <div class="md:col-span-2">
+                <div class="admin-container p-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">Информация о записи</h2>
+                    
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div>
+                            <p class="text-sm text-gray-500">Статус</p>
+                            <div class="mt-1">
+                                <span class="status-badge {% if appointment.status == 'pending' %}status-pending{% elif appointment.status == 'confirmed' %}status-confirmed{% elif appointment.status == 'cancelled' %}status-cancelled{% elif appointment.status == 'completed' %}status-completed{% endif %}">
+                                    {% if appointment.status == 'pending' %}
+                                        Ожидает
+                                    {% elif appointment.status == 'confirmed' %}
+                                        Подтверждено
+                                    {% elif appointment.status == 'cancelled' %}
+                                        Отменено
+                                    {% elif appointment.status == 'completed' %}
+                                        Завершено
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Дата создания</p>
+                            <p class="font-medium">{{ appointment.created_at.strftime('%d.%m.%Y %H:%M') }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Дата и время записи</p>
+                            <p class="font-medium">{{ appointment.appointment_date.strftime('%d.%m.%Y %H:%M') }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Услуга</p>
+                            <p class="font-medium">{{ appointment.service.name }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Стоимость</p>
+                            <p class="font-medium">{{ appointment.service.price }} ₸</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Длительность</p>
+                            <p class="font-medium">{{ appointment.service.duration }} мин.</p>
+                        </div>
+                    </div>
+                    
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Действия</h3>
+                    <div class="flex flex-wrap gap-3 mb-6">
+                        {% if appointment.status == 'pending' %}
+                        <form action="{{ url_for('admin_appointment_detail', appointment_id=appointment.id) }}" method="POST" class="inline">
+                            <input type="hidden" name="status" value="confirmed">
+                            <input type="hidden" name="admin_notes" value="Запись подтверждена администратором">
+                            <input type="hidden" name="send_email" value="true">
+                            <button type="submit" class="btn-confirm px-4 py-2 rounded text-sm font-medium">
+                                <i class="fas fa-check mr-2"></i> Подтвердить запись
+                            </button>
+                        </form>
+                        <form action="{{ url_for('admin_appointment_detail', appointment_id=appointment.id) }}" method="POST" class="inline">
+                            <input type="hidden" name="status" value="cancelled">
+                            <input type="hidden" name="admin_notes" value="Запись отклонена администратором">
+                            <input type="hidden" name="send_email" value="true">
+                            <button type="submit" class="btn-reject px-4 py-2 rounded text-sm font-medium">
+                                <i class="fas fa-times mr-2"></i> Отклонить запись
+                            </button>
+                        </form>
+                        {% elif appointment.status == 'confirmed' %}
+                        <form action="{{ url_for('admin_appointment_detail', appointment_id=appointment.id) }}" method="POST" class="inline">
+                            <input type="hidden" name="status" value="completed">
+                            <input type="hidden" name="admin_notes" value="Запись отмечена как завершенная">
+                            <button type="submit" class="btn-complete px-4 py-2 rounded text-sm font-medium">
+                                <i class="fas fa-check-double mr-2"></i> Отметить как завершенную
+                            </button>
+                        </form>
+                        <form action="{{ url_for('admin_appointment_detail', appointment_id=appointment.id) }}" method="POST" class="inline">
+                            <input type="hidden" name="status" value="cancelled">
+                            <input type="hidden" name="admin_notes" value="Запись отменена администратором">
+                            <input type="hidden" name="send_email" value="true">
+                            <button type="submit" class="btn-reject px-4 py-2 rounded text-sm font-medium">
+                                <i class="fas fa-ban mr-2"></i> Отменить запись
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                    
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Заметки администратора</h3>
+                    <form action="{{ url_for('admin_appointment_detail', appointment_id=appointment.id) }}" method="POST" class="mb-6">
+                        <input type="hidden" name="status" value="{{ appointment.status }}">
+                        <textarea name="admin_notes" rows="4" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#B88D7B] focus:border-transparent" placeholder="Добавьте заметку к этой записи..."></textarea>
+                        <div class="mt-2 flex justify-end">
+                            <button type="submit" class="btn-primary px-4 py-2 rounded text-sm font-medium">
+                                <i class="fas fa-save mr-2"></i> Сохранить заметку
+                            </button>
+                        </div>
+                    </form>
+                    
+                    {% if appointment.notes %}
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">История заметок</h3>
+                    <div class="timeline-container">
+                        {% for note in appointment.notes.split('\n\n') if note.strip() %}
+                        <div class="timeline-item">
+                            {% set note_parts = note.split(': ', 1) %}
+                            {% if note_parts|length > 1 %}
+                            <div class="timeline-date">{{ note_parts[0] }}</div>
+                            <div class="timeline-content">{{ note_parts[1] }}</div>
+                            {% else %}
+                            <div class="timeline-content">{{ note }}</div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Client Information -->
+            <div class="md:col-span-1">
+                <div class="admin-container p-6 mb-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">Информация о клиенте</h2>
+                    <div class="text-center mb-4">
+                        <div class="inline-block h-20 w-20 rounded-full bg-[#B88D7B] text-white flex items-center justify-center text-2xl font-bold">
+                            {{ appointment.user.username[0]|upper }}
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <div>
+                            <p class="text-sm text-gray-500">Имя пользователя</p>
+                            <p class="font-medium">{{ appointment.user.username }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Email</p>
+                            <p class="font-medium">{{ appointment.user.email }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Телефон</p>
+                            <p class="font-medium">{{ appointment.user.phone or 'Не указан' }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Дата регистрации</p>
+                            <p class="font-medium">{{ appointment.user.created_at.strftime('%d.%m.%Y') }}</p>
+                        </div>
+                    </div>
+                    <div class="mt-6">
+                        <a href="mailto:{{ appointment.user.email }}" class="btn-primary w-full block text-center px-4 py-2 rounded text-sm font-medium">
+                            <i class="fas fa-envelope mr-2"></i> Написать клиенту
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Email Notification -->
+                <div class="admin-container p-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">Отправить уведомление</h2>
+                    <form action="{{ url_for('admin_appointment_detail', appointment_id=appointment.id) }}" method="POST">
+                        <input type="hidden" name="status" value="{{ appointment.status }}">
+                        <input type="hidden" name="send_email" value="true">
+                        
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Тема письма</label>
+                            <input type="text" name="email_subject" value="Информация о вашей записи в BeautyDoc" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#B88D7B] focus:border-transparent">
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Текст сообщения</label>
+                            <textarea name="email_message" rows="6" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#B88D7B] focus:border-transparent">Уважаемый(ая) {{ appointment.user.username }},
+
+Ваша запись на {{ appointment.service.name }} ({{ appointment.appointment_date.strftime('%d.%m.%Y в %H:%M') }}) была {{ 'подтверждена' if appointment.status == 'confirmed' else 'отменена' }}.
+
+С уважением,
+Команда BeautyDoc</textarea>
+                        </div>
+                        
+                        <div class="flex justify-end">
+                            <button type="submit" class="btn-primary px-4 py-2 rounded text-sm font-medium">
+                                <i class="fas fa-paper-plane mr-2"></i> Отправить уведомление
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}
