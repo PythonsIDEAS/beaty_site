@@ -17,6 +17,17 @@
   ],
   "routes": [
     {
+      "src": "/db-health",
+      "dest": "/api/index.py",
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type"
+      },
+      "continue": true,
+      "check": false
+    },
+    {
       "src": "/static/(.*)",
       "dest": "/static/$1"
     },
@@ -29,6 +40,16 @@
     "env": {
       "PYTHONPATH": "."
     }
-  }
+  },
+  "headers": [
+    {
+      "source": "/db-health",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type" }
+      ]
+    }
+  ]
 }
 
