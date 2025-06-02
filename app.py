@@ -33,16 +33,37 @@ if database_url and database_url.startswith("postgres://"):
     database_url = database_url.replace("postgres://", "postgresql://", 1)
 
 # For Vercel deployment: use SQLite for local development, PostgreSQL for production
-if not database_url or 'VERCEL' not in os.environ:
+if not database_url:
     # Local development - use SQLite
     database_url = f"sqlite:///{os.path.join(BASE_DIR, 'instance', 'beauty_site.db')}"
 
+# Configure database with error handling
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    'pool_pre_ping': True,  # Check connection before using it
+    'pool_recycle': 280,    # Recycle connections after 280 seconds
+    'connect_args': {}      # Additional connection arguments
+}
+
+# For SQLite, we need to add special connect args
+if database_url.startswith('sqlite'):
+    app.config['SQLALCHEMY_ENGINE_OPTIONS']['connect_args'] = {'check_same_thread': False}
 
 
+# Initialize database
 db.init_app(app)
 migrate = Migrate(app, db)
+
+# Function to initialize database tables safely
+def init_db():
+    try:
+        with app.app_context():
+            db.create_all()
+            print("Database tables created successfully")
+    except Exception as e:
+        print(f"Error initializing database: {e}")
+        # In a serverless environment, we should not crash on DB init failure
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -94,6 +115,16 @@ def utility_processor():
             return User.query.get(session['user_id'])
         return None
     return dict(current_user=get_current_user())
+
+# Add a database health check route
+@app.route('/db-health')
+def db_health():
+    try:
+        # Just execute a simple query to check database connectivity
+        result = db.session.execute(db.select(User).limit(1))
+        return jsonify({"status": "healthy", "message": "Database connection successful"})
+    except Exception as e:
+        return jsonify({"status": "unhealthy", "message": str(e)}), 500
 
 @app.route('/')
 def index():
@@ -622,9 +653,7 @@ def delete_review(review_id):
     flash('Review deleted successfully!')
     return redirect(url_for('admin_reviews'))
 
-# Initialize the database
-with app.app_context():
-    db.create_all()
-
-# The app.run is no longer needed for Vercel deployment
-# Vercel will use the app object imported in api/index.py
+# Only initialize database in development, not in serverless environment
+if 'VERCEL' not in os.environ and __name__ == '__main__':
+    init_db()
+    app.run(debug=True)
