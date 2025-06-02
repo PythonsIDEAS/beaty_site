@@ -79,11 +79,6 @@
   "github": {
     "silent": true
   },
-  "noAuthOrigins": [
-    "/db-health",
-    "/health",
-    "/api/health.py"
-  ],
   "auth": {
     "redirects": {
       "login": "/login",
