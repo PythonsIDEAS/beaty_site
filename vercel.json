@@ -19,18 +19,41 @@
       }
     },
     {
+      "src": "api/_middleware.js",
+      "use": "@vercel/node"
+    },
+    {
       "src": "static/**",
       "use": "@vercel/static"
     }
   ],
   "rewrites": [
     { "source": "/static/(.*)", "destination": "/static/$1" },
+    { "source": "/health", "destination": "/api/health.py" },
     { "source": "/db-health", "destination": "/api/health.py" },
     { "source": "/(.*)", "destination": "/api/index.py" }
   ],
   "headers": [
     {
       "source": "/db-health",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization" },
+        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" }
+      ]
+    },
+    {
+      "source": "/health",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization" },
+        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" }
+      ]
+    },
+    {
+      "source": "/api/health.py",
       "headers": [
         { "key": "Access-Control-Allow-Origin", "value": "*" },
         { "key": "Access-Control-Allow-Methods", "value": "GET, OPTIONS" },
@@ -46,6 +69,7 @@
   },
   "public": true,
   "cleanUrls": true,
-  "regions": ["fra1"]
+  "regions": ["fra1"],
+  "trailingSlash": false
 }
 

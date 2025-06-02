@@ -45,7 +45,7 @@ def create_error_response(message, status_code):
     response.headers.add('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
     return response, status_code
 
-# Health check route
+# Health check route - explicitly public, no auth required
 @app.route('/', methods=['GET', 'OPTIONS'])
 def health_check():
     # Handle preflight OPTIONS request
