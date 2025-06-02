@@ -8,16 +8,38 @@ from flask_migrate import Migrate
 import calendar as cal
 import json
 import os
+import sys
 
 from models import db
 
 from dotenv import load_dotenv
 load_dotenv()
 
-app = Flask(__name__)
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
+# Get the absolute path to the project directory
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Create Flask app with absolute paths for templates and static folders
+app = Flask(__name__, 
+            template_folder=os.path.join(BASE_DIR, 'templates'),
+            static_folder=os.path.join(BASE_DIR, 'static'))
+
+# Configure app
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'default-secret-key-for-development')
+
+# Database configuration - handle both development and production
+database_url = os.getenv('DATABASE_URL')
+if database_url and database_url.startswith("postgres://"):
+    # Heroku-style postgres:// to postgresql:// for SQLAlchemy 1.4+
+    database_url = database_url.replace("postgres://", "postgresql://", 1)
+
+# For Vercel deployment: use SQLite for local development, PostgreSQL for production
+if not database_url or 'VERCEL' not in os.environ:
+    # Local development - use SQLite
+    database_url = f"sqlite:///{os.path.join(BASE_DIR, 'instance', 'beauty_site.db')}"
+
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 
 db.init_app(app)
 migrate = Migrate(app, db)
@@ -600,7 +622,9 @@ def delete_review(review_id):
     flash('Review deleted successfully!')
     return redirect(url_for('admin_reviews'))
 
-if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-    app.run(debug=True)
+# Initialize the database
+with app.app_context():
+    db.create_all()
+
+# The app.run is no longer needed for Vercel deployment
+# Vercel will use the app object imported in api/index.py
