@@ -6,7 +6,8 @@
       "use": "@vercel/python",
       "config": {
         "maxLambdaSize": "15mb",
-        "runtime": "python3.9"
+        "runtime": "python3.9",
+        "includeFiles": ["templates/**/*", "static/**/*"]
       }
     },
     {
@@ -27,12 +28,6 @@
   "build": {
     "env": {
       "PYTHONPATH": "."
-    }
-  },
-  "functions": {
-    "api/index.py": {
-      "memory": 1024,
-      "maxDuration": 10
     }
   }
 }
