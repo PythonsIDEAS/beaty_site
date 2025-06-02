@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, current_app
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, current_app, Response
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
@@ -11,6 +11,7 @@ import json
 import os
 import sys
 import logging
+import sqlalchemy.exc
 
 from models import db
 
@@ -76,6 +77,15 @@ def init_db():
         print(f"Error initializing database: {e}")
         # In a serverless environment, we should not crash on DB init failure
 
+# Authentication bypass for specific routes
+@app.before_request
+def handle_public_routes():
+    # Check if the route is public and should bypass authentication
+    if request.path == "/db-health":
+        # Allow the health check endpoint to bypass authentication
+        logger.info(f"Public route accessed: {request.path}")
+        return None
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -135,36 +145,73 @@ def db_health():
         response = current_app.make_default_options_response()
         response.headers.add('Access-Control-Allow-Origin', '*')
         response.headers.add('Access-Control-Allow-Methods', 'GET')
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization')
         return response
         
     try:
         # Log the health check attempt
-        logger.info("Database health check initiated")
+        logger.info(f"Database health check initiated from IP: {request.remote_addr}")
         
-        # Use a simple query that doesn't require existing data
-        result = db.session.execute("SELECT 1")
+        # Check database connection with a simple query that doesn't require existing tables
+        result = db.session.execute("SELECT 1").scalar()
         
-        # Add CORS headers to response
-        response = jsonify({
+        # Additional database info - try to count tables
+        table_count = 0
+        try:
+            if isinstance(db.engine.url.database, str):
+                table_info = f"Database name: {db.engine.url.database}"
+            else:
+                table_info = "Using in-memory database"
+            logger.info(f"Database info: {table_info}")
+        except Exception as table_err:
+            logger.warning(f"Could not get database info: {str(table_err)}")
+            table_info = "Database info not available"
+        
+        # Build response with database details
+        response_data = {
             "status": "healthy", 
             "message": "Database connection successful",
-            "timestamp": datetime.utcnow().isoformat()
-        })
+            "timestamp": datetime.utcnow().isoformat(),
+            "database_info": table_info,
+            "query_result": result == 1
+        }
+        
+        # Add CORS headers and custom headers for health check
+        response = jsonify(response_data)
         response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+        response.headers.add('X-Health-Check', 'db-connection-verified')
+        
+        logger.info("Database health check successful")
         return response
         
-    except Exception as e:
-        logger.error(f"Database health check failed: {str(e)}")
+    except sqlalchemy.exc.OperationalError as e:
+        # Database connection errors
+        error_msg = f"Database connection error: {str(e).split(')')[-1].strip()}"
+        logger.error(f"Health check failed - DB operational error: {str(e)}")
+        return create_error_response(error_msg, 503)  # Service Unavailable
         
-        # Add CORS headers to error response
-        response = jsonify({
-            "status": "unhealthy", 
-            "message": f"Database connection error: {str(e)}",
-            "timestamp": datetime.utcnow().isoformat()
-        })
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response, 500
+    except sqlalchemy.exc.SQLAlchemyError as e:
+        # General SQLAlchemy errors
+        logger.error(f"Health check failed - SQLAlchemy error: {str(e)}")
+        return create_error_response(f"Database query error: {str(e)}", 500)
+        
+    except Exception as e:
+        # Any other unexpected errors
+        logger.error(f"Health check failed - Unexpected error: {str(e)}", exc_info=True)
+        return create_error_response(f"Unexpected error: {str(e)}", 500)
+
+# Helper function to create error responses with consistent format and headers
+def create_error_response(message, status_code):
+    response = jsonify({
+        "status": "unhealthy", 
+        "message": message,
+        "timestamp": datetime.utcnow().isoformat(),
+        "error_code": status_code
+    })
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+    return response, status_code
 
 @app.route('/')
 def index():
