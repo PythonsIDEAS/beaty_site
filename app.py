@@ -42,9 +42,6 @@ if database_url and database_url.startswith("postgres://"):
     # Heroku-style postgres:// to postgresql:// for SQLAlchemy 1.4+
     database_url = database_url.replace("postgres://", "postgresql://", 1)
 
-# For Vercel deployment: use SQLite for local development, PostgreSQL for production
-    'connect_args': {}      # Additional connection arguments
-
 # Configure database with error handling
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
