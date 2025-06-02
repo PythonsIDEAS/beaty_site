@@ -11,13 +11,21 @@
       }
     },
     {
+      "src": "api/health.py",
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "15mb",
+        "runtime": "python3.9"
+      }
+    },
+    {
       "src": "static/**",
       "use": "@vercel/static"
     }
   ],
   "rewrites": [
     { "source": "/static/(.*)", "destination": "/static/$1" },
-    { "source": "/db-health", "destination": "/api/index.py" },
+    { "source": "/db-health", "destination": "/api/health.py" },
     { "source": "/(.*)", "destination": "/api/index.py" }
   ],
   "headers": [
@@ -26,7 +34,8 @@
       "headers": [
         { "key": "Access-Control-Allow-Origin", "value": "*" },
         { "key": "Access-Control-Allow-Methods", "value": "GET, OPTIONS" },
-        { "key": "Access-Control-Allow-Headers", "value": "Content-Type" }
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization" },
+        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" }
       ]
     }
   ],
@@ -34,6 +43,9 @@
     "env": {
       "PYTHONPATH": "."
     }
-  }
+  },
+  "public": true,
+  "cleanUrls": true,
+  "regions": ["fra1"]
 }
 
