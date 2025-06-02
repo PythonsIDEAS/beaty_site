@@ -15,7 +15,16 @@
       "use": "@vercel/python",
       "config": {
         "maxLambdaSize": "15mb",
-        "runtime": "python3.9"
+        "runtime": "python3.9",
+        "memory": 1024,
+        "maxDuration": 10
+      }
+    },
+    {
+      "src": "middleware.js",
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": []
       }
     },
     {
@@ -69,12 +78,6 @@
   "trailingSlash": false,
   "github": {
     "silent": true
-  },
-  "functions": {
-    "api/health.py": {
-      "memory": 1024,
-      "maxDuration": 10
-    }
   },
   "noAuthOrigins": [
     "/db-health",
