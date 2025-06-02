@@ -43,9 +43,7 @@ if database_url and database_url.startswith("postgres://"):
     database_url = database_url.replace("postgres://", "postgresql://", 1)
 
 # For Vercel deployment: use SQLite for local development, PostgreSQL for production
-if not database_url:
-    # Local development - use SQLite
-    database_url = f"sqlite:///{os.path.join(BASE_DIR, 'instance', 'beauty_site.db')}"
+    'connect_args': {}      # Additional connection arguments
 
 # Configure database with error handling
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
@@ -71,7 +69,7 @@ migrate = Migrate(app, db)
 def init_db():
     try:
         with app.app_context():
-            db.create_all()
+            # db.create_all() # Removed for Vercel deployment; use migrations instead
             print("Database tables created successfully")
     except Exception as e:
         print(f"Error initializing database: {e}")
