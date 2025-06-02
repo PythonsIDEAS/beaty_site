@@ -1,19 +1,25 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, current_app
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 from functools import wraps
 from chatbot import get_ai_response
 from flask_migrate import Migrate
+from flask_cors import CORS
 import calendar as cal
 import json
 import os
 import sys
+import logging
 
 from models import db
 
 from dotenv import load_dotenv
 load_dotenv()
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Get the absolute path to the project directory
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -22,6 +28,9 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 app = Flask(__name__, 
             template_folder=os.path.join(BASE_DIR, 'templates'),
             static_folder=os.path.join(BASE_DIR, 'static'))
+
+# Enable CORS for the health check endpoint
+CORS(app, resources={r"/db-health": {"origins": "*"}})
 
 # Configure app
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'default-secret-key-for-development')
@@ -43,7 +52,9 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     'pool_pre_ping': True,  # Check connection before using it
     'pool_recycle': 280,    # Recycle connections after 280 seconds
-    'connect_args': {}      # Additional connection arguments
+    'connect_args': {
+        'sslmode': 'require'  # Enable SSL mode for Render PostgreSQL
+    }
 }
 
 # For SQLite, we need to add special connect args
@@ -116,15 +127,44 @@ def utility_processor():
         return None
     return dict(current_user=get_current_user())
 
-# Add a database health check route
-@app.route('/db-health')
+# Add a database health check route - no authentication required
+@app.route('/db-health', methods=['GET', 'OPTIONS'])
 def db_health():
+    # Handle preflight OPTIONS request
+    if request.method == 'OPTIONS':
+        response = current_app.make_default_options_response()
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Methods', 'GET')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+        return response
+        
     try:
-        # Just execute a simple query to check database connectivity
-        result = db.session.execute(db.select(User).limit(1))
-        return jsonify({"status": "healthy", "message": "Database connection successful"})
+        # Log the health check attempt
+        logger.info("Database health check initiated")
+        
+        # Use a simple query that doesn't require existing data
+        result = db.session.execute("SELECT 1")
+        
+        # Add CORS headers to response
+        response = jsonify({
+            "status": "healthy", 
+            "message": "Database connection successful",
+            "timestamp": datetime.utcnow().isoformat()
+        })
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+        
     except Exception as e:
-        return jsonify({"status": "unhealthy", "message": str(e)}), 500
+        logger.error(f"Database health check failed: {str(e)}")
+        
+        # Add CORS headers to error response
+        response = jsonify({
+            "status": "unhealthy", 
+            "message": f"Database connection error: {str(e)}",
+            "timestamp": datetime.utcnow().isoformat()
+        })
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response, 500
 
 @app.route('/')
 def index():
