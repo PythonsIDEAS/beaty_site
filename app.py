@@ -12,6 +12,7 @@ import os
 import sys
 import logging
 import sqlalchemy.exc
+from forms import RegistrationForm
 
 from models import db
 
@@ -212,12 +213,15 @@ def create_error_response(message, status_code):
 def index():
     return render_template('index.html')
 
+
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    if request.method == 'POST':
-        username = request.form.get('username')
-        email = request.form.get('email')
-        password = request.form.get('password')
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        username = form.username.data
+        email = form.email.data
+        password = form.password.data
 
         if User.query.filter_by(username=username).first():
             flash('Пользователь с таким именем уже существует')
@@ -238,7 +242,7 @@ def register():
         flash('Регистрация успешно завершена!')
         return redirect(url_for('login'))
 
-    return render_template('register.html')
+    return render_template('register.html', form=form)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
