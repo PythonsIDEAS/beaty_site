@@ -88,18 +88,7 @@
   "trailingSlash": false,
   "github": {
     "silent": true
-  },
-  "auth": {
-    "redirects": {
-      "login": "/login",
-      "callback": "/api/callback"
-    },
-    "protection": {
-      "enabled": true,
-      "excludedRoutes": [
-        "/health",
-        "/db-health",
-        "/api/health.py"
+  }
       ]
     }
   }
