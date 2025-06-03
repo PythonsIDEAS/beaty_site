@@ -1,0 +1,568 @@
+{% extends "base.html" %}
+
+{% block title %}Конструктор страниц - Admin{% endblock %}
+
+{% block extra_styles %}
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.3/dragula.min.css" rel="stylesheet">
+<style>
+    .builder-container {
+        display: grid;
+        grid-template-columns: 300px 1fr 300px;
+        height: calc(100vh - 64px);
+        margin-top: 64px;
+    }
+
+    .builder-sidebar {
+        background: white;
+        border-right: 1px solid #e5e7eb;
+        overflow-y: auto;
+    }
+
+    .builder-content {
+        background: #f3f4f6;
+        overflow-y: auto;
+        padding: 2rem;
+    }
+
+    .builder-properties {
+        background: white;
+        border-left: 1px solid #e5e7eb;
+        overflow-y: auto;
+    }
+
+    .section-item {
+        cursor: move;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        transition: all 0.2s;
+        background: white;
+        border: 1px solid #e5e7eb;
+        margin-bottom: 0.5rem;
+    }
+
+    .section-item:hover {
+        background: #f3f4f6;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .section-preview {
+        border: 2px dashed #e5e7eb;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        background: white;
+    }
+
+    .section-preview:hover {
+        border-color: #B88D7B;
+    }
+
+    .section-preview.active {
+        border-color: #B88D7B;
+        border-style: solid;
+    }
+
+    .color-picker {
+        -webkit-appearance: none;
+        width: 50px;
+        height: 50px;
+        border: none;
+        border-radius: 0.5rem;
+        cursor: pointer;
+    }
+
+    .color-picker::-webkit-color-swatch-wrapper {
+        padding: 0;
+    }
+
+    .color-picker::-webkit-color-swatch {
+        border: none;
+        border-radius: 0.5rem;
+    }
+
+    .image-upload-area {
+        border: 2px dashed #e5e7eb;
+        border-radius: 0.5rem;
+        padding: 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .image-upload-area:hover {
+        border-color: #B88D7B;
+        background: #f3f4f6;
+    }
+
+    .gu-mirror {
+        position: fixed !important;
+        margin: 0 !important;
+        z-index: 9999 !important;
+        opacity: 0.8;
+    }
+
+    .gu-hide {
+        display: none !important;
+    }
+
+    .gu-unselectable {
+        -webkit-user-select: none !important;
+        -moz-user-select: none !important;
+        -ms-user-select: none !important;
+        user-select: none !important;
+    }
+
+    .gu-transit {
+        opacity: 0.2;
+    }
+
+    .editable:focus {
+        outline: 2px solid #B88D7B;
+        border-radius: 0.25rem;
+    }
+
+    .toolbar {
+        position: sticky;
+        top: 0;
+        background: white;
+        padding: 1rem;
+        border-bottom: 1px solid #e5e7eb;
+        z-index: 10;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="builder-container">
+    <!-- Left Sidebar - Components -->
+    <div class="builder-sidebar p-4">
+        <div class="toolbar">
+            <h2 class="text-lg font-semibold">Компоненты</h2>
+        </div>
+        
+        <!-- Section Types -->
+        <div class="space-y-3 mt-4" id="components-list">
+            <div class="section-item" data-type="header">
+                <i class="fas fa-heading mr-2"></i> Заголовок
+            </div>
+            <div class="section-item" data-type="text">
+                <i class="fas fa-paragraph mr-2"></i> Текст
+            </div>
+            <div class="section-item" data-type="image">
+                <i class="fas fa-image mr-2"></i> Изображение
+            </div>
+            <div class="section-item" data-type="gallery">
+                <i class="fas fa-images mr-2"></i> Галерея
+            </div>
+            <div class="section-item" data-type="button">
+                <i class="fas fa-square mr-2"></i> Кнопка
+            </div>
+            <div class="section-item" data-type="spacer">
+                <i class="fas fa-arrows-alt-v mr-2"></i> Разделитель
+            </div>
+        </div>
+
+        <!-- Layouts -->
+        <h2 class="text-lg font-semibold mt-8 mb-4">Макеты</h2>
+        <div class="space-y-3">
+            {% for layout in layouts %}
+            <div class="section-item" onclick="selectLayout('{{ layout.id }}')">
+                <i class="fas fa-columns mr-2"></i> {{ layout.name }}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="builder-content">
+        <div class="toolbar">
+            <input type="text" 
+                   class="text-2xl font-bold border-none focus:outline-none bg-transparent" 
+                   placeholder="Название страницы" 
+                   value="{{ page.title if page else '' }}">
+            
+            <div class="flex space-x-4">
+                <button onclick="savePage('draft')" 
+                        class="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors">
+                    <i class="far fa-save mr-2"></i> Сохранить черновик
+                </button>
+                <button onclick="savePage('publish')" 
+                        class="px-4 py-2 bg-[#B88D7B] text-white rounded-lg hover:bg-[#A67C6B] transition-colors">
+                    <i class="fas fa-globe mr-2"></i> Опубликовать
+                </button>
+            </div>
+        </div>
+
+        <div id="sections" class="p-8 space-y-4">
+            {% if page and page.sections %}
+                {% for section in page.sections %}
+                <div class="section-preview" data-section-id="{{ section.id }}">
+                    {{ section.content|safe }}
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="section-preview empty-state text-center py-12 text-gray-400">
+                    <i class="fas fa-plus-circle text-6xl mb-4"></i>
+                    <p>Перетащите компоненты сюда для создания страницы</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Right Sidebar - Properties -->
+    <div class="builder-properties p-4">
+        <div class="toolbar">
+            <h2 class="text-lg font-semibold">Свойства</h2>
+        </div>
+        
+        <div id="properties-content" class="mt-4">
+            <div class="text-center text-gray-400 py-12">
+                <i class="fas fa-sliders-h text-6xl mb-4"></i>
+                <p>Выберите элемент для редактирования свойств</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.3/dragula.min.js"></script>
+<script>
+let drake;
+let selectedSection = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    initializeDragAndDrop();
+    initializeEditableContent();
+});
+
+function initializeDragAndDrop() {
+    drake = dragula([
+        document.getElementById('components-list'),
+        document.getElementById('sections')
+    ], {
+        copy: function(el, source) {
+            return source === document.getElementById('components-list');
+        },
+        accepts: function(el, target) {
+            return target === document.getElementById('sections');
+        }
+    });
+
+    drake.on('drop', function(el, target, source, sibling) {
+        if (target === document.getElementById('sections')) {
+            const type = el.dataset.type;
+            createSection(type, el);
+            
+            // Remove empty state if exists
+            const emptyState = document.querySelector('.empty-state');
+            if (emptyState) emptyState.remove();
+        }
+    });
+}
+
+function initializeEditableContent() {
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.section-preview')) {
+            const section = e.target.closest('.section-preview');
+            selectSection(section);
+        }
+    });
+}
+
+function selectSection(section) {
+    // Remove active class from previously selected section
+    document.querySelectorAll('.section-preview.active').forEach(el => {
+        el.classList.remove('active');
+    });
+
+    // Add active class to selected section
+    section.classList.add('active');
+    selectedSection = section;
+
+    // Show properties panel
+    showProperties(section);
+}
+
+function createSection(type, element) {
+    const section = document.createElement('div');
+    section.className = 'section-preview';
+    section.dataset.type = type;
+
+    let content = '';
+    switch(type) {
+        case 'header':
+            content = `
+                <div class="editable" contenteditable="true">
+                    <h2 class="text-2xl font-bold">Новый заголовок</h2>
+                </div>
+            `;
+            break;
+        case 'text':
+            content = `
+                <div class="editable" contenteditable="true">
+                    <p>Введите текст здесь...</p>
+                </div>
+            `;
+            break;
+        case 'image':
+            content = `
+                <div class="image-upload-area">
+                    <input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(this)">
+                    <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-2"></i>
+                    <p>Нажмите для загрузки изображения</p>
+                </div>
+            `;
+            break;
+        case 'gallery':
+            content = `
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="image-upload-area">
+                        <input type="file" accept="image/*" multiple class="hidden" onchange="handleGalleryUpload(this)">
+                        <i class="fas fa-plus text-4xl text-gray-400 mb-2"></i>
+                        <p>Добавить изображения</p>
+                    </div>
+                </div>
+            `;
+            break;
+        case 'button':
+            content = `
+                <button class="px-6 py-2 bg-[#B88D7B] text-white rounded-lg hover:bg-[#A67C6B] transition-colors editable" contenteditable="true">
+                    Новая кнопка
+                </button>
+            `;
+            break;
+        case 'spacer':
+            content = `<div class="h-16"></div>`;
+            break;
+    }
+
+    section.innerHTML = content;
+    element.replaceWith(section);
+    selectSection(section);
+}
+
+function showProperties(section) {
+    const panel = document.getElementById('properties-content');
+    const type = section.dataset.type;
+
+    let propertiesHtml = '';
+    switch(type) {
+        case 'header':
+            propertiesHtml = `
+                <div class="space-y-4">
+                    <div class="form-group">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Размер заголовка</label>
+                        <select class="w-full rounded-lg border-gray-300" onchange="updateProperty('fontSize', this.value)">
+                            <option value="text-xl">Маленький</option>
+                            <option value="text-2xl" selected>Средний</option>
+                            <option value="text-3xl">Большой</option>
+                            <option value="text-4xl">Очень большой</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Цвет текста</label>
+                        <input type="color" class="color-picker" onchange="updateProperty('color', this.value)">
+                    </div>
+                </div>
+            `;
+            break;
+        case 'text':
+            propertiesHtml = `
+                <div class="space-y-4">
+                    <div class="form-group">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Выравнивание</label>
+                        <select class="w-full rounded-lg border-gray-300" onchange="updateProperty('textAlign', this.value)">
+                            <option value="text-left">По левому краю</option>
+                            <option value="text-center">По центру</option>
+                            <option value="text-right">По правому краю</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Цвет текста</label>
+                        <input type="color" class="color-picker" onchange="updateProperty('color', this.value)">
+                    </div>
+                </div>
+            `;
+            break;
+        case 'button':
+            propertiesHtml = `
+                <div class="space-y-4">
+                    <div class="form-group">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Цвет фона</label>
+                        <input type="color" class="color-picker" value="#B88D7B" onchange="updateProperty('backgroundColor', this.value)">
+                    </div>
+                    <div class="form-group">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Размер кнопки</label>
+                        <select class="w-full rounded-lg border-gray-300" onchange="updateProperty('buttonSize', this.value)">
+                            <option value="small">Маленькая</option>
+                            <option value="medium" selected>Средняя</option>
+                            <option value="large">Большая</option>
+                        </select>
+                    </div>
+                </div>
+            `;
+            break;
+        case 'spacer':
+            propertiesHtml = `
+                <div class="space-y-4">
+                    <div class="form-group">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Высота разделителя</label>
+                        <input type="range" min="8" max="64" value="16" class="w-full" onchange="updateProperty('spacerHeight', this.value)">
+                    </div>
+                </div>
+            `;
+            break;
+    }
+
+    panel.innerHTML = propertiesHtml;
+}
+
+function updateProperty(property, value) {
+    if (!selectedSection) return;
+
+    const element = selectedSection.querySelector('.editable') || selectedSection;
+
+    switch(property) {
+        case 'fontSize':
+            element.querySelector('h2').className = `${value} font-bold`;
+            break;
+        case 'textAlign':
+            element.className = `editable ${value}`;
+            break;
+        case 'color':
+            element.style.color = value;
+            break;
+        case 'backgroundColor':
+            if (selectedSection.dataset.type === 'button') {
+                element.style.backgroundColor = value;
+            }
+            break;
+        case 'buttonSize':
+            const sizes = {
+                small: 'px-4 py-1 text-sm',
+                medium: 'px-6 py-2',
+                large: 'px-8 py-3 text-lg'
+            };
+            element.className = `${sizes[value]} bg-[#B88D7B] text-white rounded-lg hover:bg-[#A67C6B] transition-colors editable`;
+            break;
+        case 'spacerHeight':
+            element.style.height = `${value}px`;
+            break;
+    }
+}
+
+async function handleImageUpload(input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+        const response = await fetch('/admin/api/upload-image', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+        if (data.url) {
+            const container = input.closest('.image-upload-area');
+            container.innerHTML = `
+                <img src="${data.url}" alt="Uploaded image" class="w-full h-auto rounded-lg">
+                <button onclick="replaceImage(this)" class="mt-2 text-sm text-[#B88D7B] hover:text-[#A67C6B]">
+                    <i class="fas fa-exchange-alt mr-1"></i> Заменить
+                </button>
+            `;
+        }
+    } catch (error) {
+        console.error('Error uploading image:', error);
+        alert('Произошла ошибка при загрузке изображения');
+    }
+}
+
+function replaceImage(button) {
+    const container = button.parentElement;
+    container.innerHTML = `
+        <input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(this)">
+        <div class="image-upload-area">
+            <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-2"></i>
+            <p>Нажмите для загрузки изображения</p>
+        </div>
+    `;
+}
+
+async function savePage(status) {
+    const title = document.querySelector('input[placeholder="Название страницы"]').value;
+    if (!title) {
+        alert('Пожалуйста, введите название страницы');
+        return;
+    }
+
+    const sections = [];
+    document.querySelectorAll('#sections > .section-preview').forEach((section, index) => {
+        sections.push({
+            type: section.dataset.type,
+            content: section.innerHTML,
+            order: index,
+            style: {
+                // Add style properties as needed
+            }
+        });
+    });
+
+    const pageData = {
+        page_name: title.toLowerCase().replace(/\s+/g, '-'), // Generate URL-friendly page name
+        title: title,
+        layout_id: document.querySelector('.section-item.active')?.dataset?.layoutId || 1, // Default to first layout if none selected
+        is_published: status === 'publish',
+        sections: sections
+    };
+
+    try {
+        const url = '{{ page.id if page else "" }}' 
+            ? `/admin/api/pages/{{ page.id }}` 
+            : '/admin/api/pages';
+            
+        const response = await fetch(url, {
+            method: '{{ page.id if page else "" }}' ? 'PUT' : 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(pageData)
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+            window.location.href = '/admin/pages';
+        } else {
+            alert(data.error || 'Произошла ошибка при сохранении страницы');
+        }
+    } catch (error) {
+        console.error('Error saving page:', error);
+        alert('Произошла ошибка при сохранении страницы');
+    }
+}
+
+function selectLayout(layoutId) {
+    // Remove active class from previously selected layout
+    document.querySelectorAll('.section-item').forEach(item => {
+        item.classList.remove('active');
+    });
+
+    // Add active class and layout ID to the selected layout
+    const selectedLayout = document.querySelector(`.section-item[onclick="selectLayout('${layoutId}')"]`);
+    if (selectedLayout) {
+        selectedLayout.classList.add('active');
+        selectedLayout.dataset.layoutId = layoutId;
+    }
+}
+</script>
+{% endblock %}

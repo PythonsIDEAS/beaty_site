@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page.title }}{% endblock %}
+
+{% block meta_description %}
+    <meta name="description" content="{{ page.meta_description }}">
+{% endblock %}
+
+{% block content %}
+<div class="page-content">
+    <h1>{{ page.title }}</h1>
+    
+    {# Render page content based on layout #}
+    {% if page.layout %}
+        <div class="layout-container" data-layout-id="{{ page.layout.id }}">
+            {# Sort sections by order #}
+            {% for section in page.sections|sort(attribute='order') %}
+                <div class="section {{ section.section_type }}" 
+                     data-section-id="{{ section.id }}" 
+                     data-order="{{ section.order }}">
+                    {# Load section content from JSON #}
+                    {% set content = section.get_content() %}
+                    {% set style = section.get_style() %}
+                    
+                    {# Apply custom styles if any #}
+                    <div class="section-content"{% if style %} style="{% for key, value in style.items() %}{{ key }}:{{ value }};{% endfor %}"{% endif %}>
+                        {% if section.section_type == 'text' %}
+                            {{ content.text|safe }}
+                        {% elif section.section_type == 'image' %}
+                            <img src="{{ content.url }}" alt="{{ content.alt }}" class="section-image">
+                        {% elif section.section_type == 'gallery' %}
+                            <div class="gallery-container">
+                                {% for image in content.images %}
+                                    <div class="gallery-item">
+                                        <img src="{{ image.url }}" alt="{{ image.alt }}">
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        {{ page.content|safe }}
+    {% endif %}
+</div>
+{% endblock %}

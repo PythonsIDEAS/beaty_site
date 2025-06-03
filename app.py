@@ -15,6 +15,7 @@ import sqlalchemy.exc
 from forms import RegistrationForm
 
 from models import db
+from admin_routes import admin
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -62,6 +63,20 @@ if database_url.startswith('sqlite'):
 # Initialize database
 db.init_app(app)
 migrate = Migrate(app, db)
+app.register_blueprint(admin, url_prefix='/') # Register the admin blueprint
+
+@app.route('/page/<identifier>')
+def view_page(identifier):
+    from models import PageContent
+    
+    # Try to find page by ID first
+    if identifier.isdigit():
+        page = PageContent.query.get_or_404(int(identifier))
+    else:
+        # If not numeric, search by page_name
+        page = PageContent.query.filter_by(page_name=identifier).first_or_404()
+    
+    return render_template('page.html', page=page)
 
 # Function to initialize database tables safely
 def init_db():
