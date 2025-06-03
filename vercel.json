@@ -44,20 +44,10 @@
   "rewrites": [
     { "source": "/static/(.*)", "destination": "/static/$1" },
     { "source": "/health", "destination": "/api/health.py" },
-    { "source": "/db-health", "destination": "/api/health.py" },
     { "source": "/page/(.*)", "destination": "/api/page.py" },
     { "source": "/(.*)", "destination": "/api/index.py" }
   ],
   "headers": [
-    {
-      "source": "/db-health",
-      "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET, OPTIONS" },
-        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization" },
-        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" }
-      ]
-    },
     {
       "source": "/health",
       "headers": [
@@ -89,8 +79,6 @@
   "github": {
     "silent": true
   }
-      ]
-    }
   }
 }
 
