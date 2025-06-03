@@ -7,7 +7,16 @@
       "config": {
         "maxLambdaSize": "15mb",
         "runtime": "python3.9",
-        "includeFiles": ["templates/**/*", "static/**/*"]
+        "includeFiles": ["templates/**/*", "static/**/*", "models/**/*"]
+      }
+    },
+    {
+      "src": "api/page.py",
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "15mb",
+        "runtime": "python3.9",
+        "includeFiles": ["templates/**/*", "static/**/*", "models/**/*"]
       }
     },
     {
@@ -36,6 +45,7 @@
     { "source": "/static/(.*)", "destination": "/static/$1" },
     { "source": "/health", "destination": "/api/health.py" },
     { "source": "/db-health", "destination": "/api/health.py" },
+    { "source": "/page/(.*)", "destination": "/api/page.py" },
     { "source": "/(.*)", "destination": "/api/index.py" }
   ],
   "headers": [
